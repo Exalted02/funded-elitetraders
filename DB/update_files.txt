@@ -1,0 +1,68 @@
+-----------------27/06/2025-----------------
+X 1) Vendor Zip file - for package Yajra Datatable
+
+X 2) routes\web.php
+
+X 3) resources\views\user\payouts.blade.php
+X 4) resources\views\user\kyc.blade.php
+X 5) resources\views\user\random-payouts.blade.php
+X 6) resources\views\user\user-accounts.blade.php
+X 7) resources\views\user\challenges.blade.php
+
+X 8) public\front-assets\js\page\payouts.js
+X 9) public\front-assets\js\page\kyc.js
+X 10) public\front-assets\js\page\challenges.js
+X 11) public\front-assets\js\page\user.js
+X 12) public\front-assets\js\page\random-payouts.js
+
+X 13) app\Http\Controllers\PayoutsController.php
+X 14) app\Http\Controllers\KycController.php
+X 15) app\Http\Controllers\UserController.php
+X 16) app\Http\Controllers\ChallengesController.php
+X 17) app\Models\Cron_kyc_documents.php
+X 18) app\Models\Cron_adjust_balance.php
+X 19) app\Services\ChallengeService.php - Need to create 'Services' folder then upload
+X 20) app\Console\Kernel.php
+X 21) app\Console\Commands\ChangeKycStatus.php
+X 22) app\Console\Commands\MultiAdjustBalance.php
+X 23) app\helper.php
+
+X 24) database\migrations\2025_06_26_100048_create_cron_adjust_balances_table.php
+X 25) database\migrations\2014_10_12_000000_create_users_table.php
+X 26) database\migrations\2025_06_27_060306_create_cron_kyc_documents_table.php
+
+X 27) cron_kyc_documents table - at first export from local database then upload in server
+X 28) cron_adjust_balances table - at first export from local database then upload in server
+
+-----------------07/07/2025-----------------
+X 1) D:\xampp\htdocs\funded-elitetraders\app\Http\Controllers\KycController.php
+X 2) D:\xampp\htdocs\funded-elitetraders\app\Console\Commands\ChangeKycStatus.php
+X 3) D:\xampp\htdocs\funded-elitetraders\database\migrations\2025_03_27_062743_create_kyc_documents_table.php
+4) D:\xampp\htdocs\funded-elitetraders\app\Http\Controllers\ChallengesController.php
+5) D:\xampp\htdocs\funded-elitetraders\app\Console\Commands\MultiAdjustBalance.php
+6) 
+
+X 1) ALTER TABLE `kyc_documents` ADD `email_status` TINYINT(4) NOT NULL DEFAULT '1' COMMENT '0=email already send, 1=email not send' AFTER `residence`;
+2) ALTER TABLE `adjust_users_balances` ADD `email_status` TINYINT(4) NOT NULL DEFAULT '1' COMMENT '0=email already send, 1=email not send' AFTER `type`;
+3) ALTER TABLE `challenges` ADD `funded_email_status` TINYINT(4) NOT NULL DEFAULT '1' COMMENT '0=email already send, 1=email not send' AFTER `funded_date`;
+
+-----------------12/08/2025 for certificate verification-----------------
+D:\xampp\htdocs\funded-elitetraders\routes\web.php
+
+D:\xampp\htdocs\funded-elitetraders\app\Http\Controllers\CertificateController.php
+D:\xampp\htdocs\funded-elitetraders\app\Models\Certificate.php
+D:\xampp\htdocs\funded-elitetraders\app\Services\ChallengeService.php
+
+D:\xampp\htdocs\funded-elitetraders\resources\views\user\certificate.blade.php
+D:\xampp\htdocs\funded-elitetraders\resources\views\user\view-certificate.blade.php
+D:\xampp\htdocs\funded-elitetraders\resources\views\_includes\sidebar.blade.php
+D:\xampp\htdocs\funded-elitetraders\resources\views\modal\certificate-modal.blade.php
+
+D:\xampp\htdocs\funded-elitetraders\public\front-assets\js\page\certificate.js
+
+D:\xampp\htdocs\funded-elitetraders\database\migrations\2025_08_12_055731_create_certificates_table.php
+
+D:\xampp\htdocs\funded-elitetraders\vendor
+
+D:\xampp\htdocs\funded-elitetraders\public\verification-certificate\certificate.png
+

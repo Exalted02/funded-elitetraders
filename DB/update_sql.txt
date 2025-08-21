@@ -1,0 +1,34 @@
+-----------------26/06/2025-----------------
+ALTER TABLE `adjust_users_balances` ADD INDEX(`percentage_value`);
+ALTER TABLE `adjust_users_balances` ADD INDEX(`trade_pair`);
+
+ALTER TABLE `challenges` ADD INDEX(`trade_pair`);
+ALTER TABLE `challenges` ADD INDEX(`phone`);
+ALTER TABLE `challenges` ADD INDEX(`last_name`);
+ALTER TABLE `challenges` ADD INDEX(`first_name`);
+ALTER TABLE `challenges` ADD INDEX(`email`);
+
+ALTER TABLE `challenge_types` ADD INDEX(`title`);
+ALTER TABLE `challenge_types` ADD INDEX(`percent`);
+
+ALTER TABLE `client_payout_requests` ADD INDEX(`usdc_address`);
+ALTER TABLE `client_payout_requests` ADD INDEX(`withdrawable_adjust_id`);
+
+ALTER TABLE `countries` ADD INDEX(`shortname`);
+ALTER TABLE `countries` ADD INDEX(`name`);
+
+ALTER TABLE `cron_adjust_balances` ADD INDEX(`percentage_value`);
+
+ALTER TABLE `custom_user_emails` ADD INDEX(`message_subject`);
+
+ALTER TABLE `kyc_documents` ADD INDEX(`frontal`);
+ALTER TABLE `kyc_documents` ADD INDEX(`back`);
+ALTER TABLE `kyc_documents` ADD INDEX(`residence`);
+
+ALTER TABLE `users` ADD INDEX(`name`);
+ALTER TABLE `users` ADD INDEX(`first_name`);
+ALTER TABLE `users` ADD INDEX(`last_name`);
+ALTER TABLE `users` ADD INDEX(`phone_number`);
+ALTER TABLE `users` ADD INDEX(`password`);
+ALTER TABLE `users` CHANGE `otp` `otp` INT(11) NULL DEFAULT NULL;
+

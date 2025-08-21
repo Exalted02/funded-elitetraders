@@ -1,0 +1,11 @@
+.error-page {
+    background-color: #141414;
+	color: #FFFFFF;
+}
+.error-page h3 {
+	color: #FFFFFF;
+}
+.error-page .btn-danger {
+    background-color: rgb(129, 0, 0);
+    border-color: rgb(129, 0, 0);
+}
