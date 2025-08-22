@@ -40,6 +40,8 @@
 				<li class="mb-3 text-center">
 					@if($challenge_status == 0)
 					<button class="btn btn-square btn-outline-warning"><i class="las la-clock"></i> On Challenge</button>
+					@elseif($challenge_status == 3)
+					<button class="btn btn-square btn-outline-warning"><i class="las la-clock"></i> Phase 2</button>
 					@elseif($challenge_status == 1)
 					<button class="btn btn-square btn-outline-success"><i class="las la-check-double"></i> Funded</button>
 					@elseif($challenge_status == 2)
@@ -53,9 +55,9 @@
 				<li class="{{ request()->routeIs('client.account') ? 'active' : '' }}">
 					<a href="{{ route('client.account')}}"><i class="la la-user-cog"></i> <span> Account </span></a>
 				</li>
-				<li class="{{ request()->routeIs('client.verification') ? 'active' : '' }}">
+				{{--<li class="{{ request()->routeIs('client.verification') ? 'active' : '' }}">
 					<a href="{{ route('client.verification')}}"><i class="la la-user-check"></i> <span> Verification </span></a>
-				</li>
+				</li>--}}
 				<li class="{{ request()->routeIs('payouts.random-payout-details') ? 'active' : '' }}">
 					<a href="{{ route('payouts.random-payout-details')}}"><i class="la la-money"></i> <span> Recent Payouts </span></a>
 				</li>

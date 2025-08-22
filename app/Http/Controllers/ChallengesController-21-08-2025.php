@@ -75,9 +75,6 @@ class ChallengesController extends Controller
 					0 => '<a class="btn btn-white btn-sm badge-outline-primary dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">
 							<i class="fa-regular fa-circle-dot text-primary"></i> On Challenge
 						  </a>',
-					3 => '<a class="btn btn-white btn-sm badge-outline-primary dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">
-							<i class="fa-regular fa-circle-dot text-primary"></i> Phase 2
-						  </a>',
 					1 => '<a class="btn btn-white btn-sm badge-outline-success dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">
 							<i class="fa-regular fa-circle-dot text-success"></i> Funded
 						  </a>',
@@ -91,9 +88,6 @@ class ChallengesController extends Controller
 					<div class="dropdown-menu dropdown-menu-right">
 						<a class="dropdown-item update-status" href="javascript:void(0);" data-id="' . $row->id . '" data-url="' . route('challenges.challenge-update-status') . '" data-type="0">
 							<i class="fa-regular fa-circle-dot text-primary"></i> On Challenge
-						</a>
-						<a class="dropdown-item update-status" href="javascript:void(0);" data-id="' . $row->id . '" data-url="' . route('challenges.challenge-update-status') . '" data-type="3">
-							<i class="fa-regular fa-circle-dot text-primary"></i> Phase 2
 						</a>
 						<a class="dropdown-item update-status" href="javascript:void(0);" data-id="' . $row->id . '" data-url="' . route('challenges.challenge-update-status') . '" data-type="1">
 							<i class="fa-regular fa-circle-dot text-success"></i> Funded
@@ -441,183 +435,75 @@ class ChallengesController extends Controller
 		
 		$APP_NAME  = env('APP_NAME');
 		$logo = '<img src="' . url('front-assets/img/-logo1.png') . '" alt="Expert funded" width="150">';
-		$actual_challenge = Challenge::with(['get_challenge_type'])->where('id', $request->adjust_amount_challenge)->first();
-		if($actual_challenge->challenge_type == 0){ //For Old challenge
-			//Update status to failed
-				$maximum_drawdown = $actual_challenge;
-				if($maximum_drawdown->status != 2){ //If status not failed
-					$adjust_users_balance = Adjust_users_balance::where('challenge_id', $request->adjust_amount_challenge)->where('type', 1)->sum('amount_paid');
-					
-					$maximum_drawdown_amount = $maximum_drawdown->get_challenge_type->amount * (10/100);				
-					if ($adjust_users_balance <= -$maximum_drawdown_amount) {
-						$maximum_drawdown->status = 2;
-						$maximum_drawdown->funded_date = null;
-						$maximum_drawdown->funded_email_status = 0;
-						$maximum_drawdown->save();
-					}
-					
-					$maximum_daily_drawdown_amount = ($adjust_users_balance + $maximum_drawdown->get_challenge_type->amount) * (5/100);
-					if ($adjust_users_balance <= -$maximum_daily_drawdown_amount) {
-						$maximum_drawdown->status = 2;
-						$maximum_drawdown->funded_date = null;
-						$maximum_drawdown->funded_email_status = 0;
-						$maximum_drawdown->save();
-					}
+		//Update status to failed
+			$maximum_drawdown = Challenge::with(['get_challenge_type'])->where('id', $request->adjust_amount_challenge)->first();
+			if($maximum_drawdown->status != 2){ //If status not failed
+				$adjust_users_balance = Adjust_users_balance::where('challenge_id', $request->adjust_amount_challenge)->where('type', 1)->sum('amount_paid');
+				
+				$maximum_drawdown_amount = $maximum_drawdown->get_challenge_type->amount * (10/100);				
+				if ($adjust_users_balance <= -$maximum_drawdown_amount) {
+					$maximum_drawdown->status = 2;
+					$maximum_drawdown->funded_date = null;
+					$maximum_drawdown->funded_email_status = 0;
+					$maximum_drawdown->save();
 				}
-			//Update status to failed
-			//Update status to funded
-				$get_challenge = $actual_challenge;
-				if($get_challenge->status != 1){
-					$adjust_users_balance = Adjust_users_balance::where('challenge_id', $request->adjust_amount_challenge)->where('type', 1)->sum('amount_paid');
+				
+				$maximum_daily_drawdown_amount = ($adjust_users_balance + $maximum_drawdown->get_challenge_type->amount) * (5/100);
+				if ($adjust_users_balance <= -$maximum_daily_drawdown_amount) {
+					$maximum_drawdown->status = 2;
+					$maximum_drawdown->funded_date = null;
+					$maximum_drawdown->funded_email_status = 0;
+					$maximum_drawdown->save();
+				}
+			}
+		//Update status to failed
+		//Update status to funded
+			$get_challenge = Challenge::with(['get_challenge_type'])->where('id', $request->adjust_amount_challenge)->first();
+			if($get_challenge->status != 1){
+				$adjust_users_balance = Adjust_users_balance::where('challenge_id', $request->adjust_amount_challenge)->where('type', 1)->sum('amount_paid');
+				
+				$achieved_balance = $get_challenge->get_challenge_type->amount * (10/100);
+				if($achieved_balance <= $adjust_users_balance){
+					$get_challenge->status = 1;
+					$get_challenge->funded_date = date('Y-m-d');
+					$get_challenge->save();
 					
-					$achieved_balance = $get_challenge->get_challenge_type->amount * (10/100);
-					if($achieved_balance <= $adjust_users_balance){
-						$get_challenge->status = 1;
-						$get_challenge->funded_date = date('Y-m-d');
-						$get_challenge->save();
+					//Update all adjust balance to zero
+					$adjust_users_balance_zero = Adjust_users_balance::where('challenge_id', $request->adjust_amount_challenge)->where('type', 1)->update(['amount_paid' => 0]);
+							
+					$phase = $get_challenge->get_challenge_type->title;
+					$email_content = get_email(4);
+					if(!empty($email_content))
+					{
+						$maildata = [
+							'subject' => $email_content->message_subject,
+							'body' => str_replace(array("[LOGO]", "[PHASE]", "[SCREEN_NAME]", "[YEAR]"), array($logo, $phase, $APP_NAME, date('Y')), $email_content->message),
+							'toEmails' => array($get_challenge->email),
+							//'files' => array($attatchment),
+						];
 						
-						//Update all adjust balance to zero
-						$adjust_users_balance_zero = Adjust_users_balance::where('challenge_id', $request->adjust_amount_challenge)->where('type', 1)->update(['amount_paid' => 0]);
-								
-						$phase = $get_challenge->get_challenge_type->title;
-						$email_content = get_email(4);
-						if(!empty($email_content))
-						{
-							$maildata = [
-								'subject' => $email_content->message_subject,
-								'body' => str_replace(array("[LOGO]", "[PHASE]", "[SCREEN_NAME]", "[YEAR]"), array($logo, $phase, $APP_NAME, date('Y')), $email_content->message),
-								'toEmails' => array($get_challenge->email),
-								//'files' => array($attatchment),
-							];
+						if(env('CERTIFICATE_SEND')){
+							$challenge_service = resolve(ChallengeService::class);
 							
-							if(env('CERTIFICATE_SEND')){
-								$challenge_service = resolve(ChallengeService::class);
-								
-								$name = $get_challenge->first_name.' '.$get_challenge->last_name;
-								$attatchment = $challenge_service->generateCertificate($request->adjust_amount_challenge, $name, $adjust_users_balance, $get_challenge->funded_date);
-								//dd($attatchment);
-								if(!empty($attatchment)) {
-									$maildata['files'] = [$attatchment];
-								}
+							$name = $get_challenge->first_name.' '.$get_challenge->last_name;
+							$attatchment = $challenge_service->generateCertificate($request->adjust_amount_challenge, $name, $adjust_users_balance, $get_challenge->funded_date);
+							//dd($attatchment);
+							if(!empty($attatchment)) {
+								$maildata['files'] = [$attatchment];
 							}
+						}
+						
+						try {
+							// send_email($maildata); //turn off as client said
 							
-							try {
-								// send_email($maildata); //turn off as client said
-								
-							} catch (\Exception $e) {
-								//
-							}
+						} catch (\Exception $e) {
+							//
 						}
 					}
 				}
-			//Update status to funded
-		}
-		else { //For New challenge
-			//Update status to failed
-				$maximum_drawdown = $actual_challenge;
-				if($maximum_drawdown->status != 2){ //If status not failed
-					$adjust_users_balance = Adjust_users_balance::where('challenge_id', $request->adjust_amount_challenge)->where('type', 1)->sum('amount_paid');
-					
-					$maximum_drawdown_amount = $maximum_drawdown->get_challenge_type->amount * (15/100);				
-					if ($adjust_users_balance <= -$maximum_drawdown_amount) {
-						$maximum_drawdown->status = 2;
-						$maximum_drawdown->funded_date = null;
-						$maximum_drawdown->funded_email_status = 0;
-						$maximum_drawdown->save();
-					}
-					
-					$maximum_daily_drawdown_amount = ($adjust_users_balance + $maximum_drawdown->get_challenge_type->amount) * (5/100);
-					if ($adjust_users_balance <= -$maximum_daily_drawdown_amount) {
-						$maximum_drawdown->status = 2;
-						$maximum_drawdown->funded_date = null;
-						$maximum_drawdown->funded_email_status = 0;
-						$maximum_drawdown->save();
-					}
-				}
-			//Update status to failed
-			//Update status to phase 2
-				$get_challenge = $actual_challenge;
-				if($get_challenge->status != 3 && ($get_challenge->status == 0 || $get_challenge->status == 2)){
-					$adjust_users_balance = Adjust_users_balance::where('challenge_id', $request->adjust_amount_challenge)->where('type', 1)->sum('amount_paid');
-					
-					$achieved_balance = $get_challenge->get_challenge_type->amount * (10/100);
-					if($achieved_balance <= $adjust_users_balance){
-						$get_challenge->status = 3;
-						$get_challenge->phase_one_amount = $adjust_users_balance;
-						$get_challenge->funded_date = null;
-						$get_challenge->save();
-						
-						//Update all adjust balance to zero
-						$adjust_users_balance_zero = Adjust_users_balance::where('challenge_id', $request->adjust_amount_challenge)->where('type', 1)->update(['amount_paid' => 0]);
-								
-						/*$phase = $get_challenge->get_challenge_type->title;
-						$email_content = get_email(4);
-						if(!empty($email_content))
-						{
-							$maildata = [
-								'subject' => $email_content->message_subject,
-								'body' => str_replace(array("[LOGO]", "[PHASE]", "[SCREEN_NAME]", "[YEAR]"), array($logo, $phase, $APP_NAME, date('Y')), $email_content->message),
-								'toEmails' => array($get_challenge->email),
-							];
-							
-							try {
-								// send_email($maildata); //turn off as client said
-								
-							} catch (\Exception $e) {
-								//
-							}
-						}*/
-					}
-				}
-			//Update status to phase 2
-			//Update status to live phase / Funded
-				$get_challenge = $actual_challenge;
-				if($get_challenge->status != 1 && $get_challenge->status == 3){
-					$adjust_users_balance = Adjust_users_balance::where('challenge_id', $request->adjust_amount_challenge)->where('type', 1)->sum('amount_paid');
-					
-					$achieved_balance = $get_challenge->get_challenge_type->amount * (5/100);
-					if($achieved_balance <= $adjust_users_balance){
-						$get_challenge->status = 1;
-						$get_challenge->phase_two_amount = $adjust_users_balance;
-						$get_challenge->funded_date = date('Y-m-d');
-						$get_challenge->save();
-						
-						//Update all adjust balance to zero
-						$adjust_users_balance_zero = Adjust_users_balance::where('challenge_id', $request->adjust_amount_challenge)->where('type', 1)->update(['amount_paid' => 0]);
-								
-						$phase = $get_challenge->get_challenge_type->title;
-						$email_content = get_email(4);
-						if(!empty($email_content))
-						{
-							$maildata = [
-								'subject' => $email_content->message_subject,
-								'body' => str_replace(array("[LOGO]", "[PHASE]", "[SCREEN_NAME]", "[YEAR]"), array($logo, $phase, $APP_NAME, date('Y')), $email_content->message),
-								'toEmails' => array($get_challenge->email),
-								//'files' => array($attatchment),
-							];
-							
-							if(env('CERTIFICATE_SEND')){
-								$challenge_service = resolve(ChallengeService::class);
-								
-								$name = $get_challenge->first_name.' '.$get_challenge->last_name;
-								$attatchment = $challenge_service->generateCertificate($request->adjust_amount_challenge, $name, $adjust_users_balance, $get_challenge->funded_date);
-								//dd($attatchment);
-								if(!empty($attatchment)) {
-									$maildata['files'] = [$attatchment];
-								}
-							}
-							
-							try {
-								// send_email($maildata); //turn off as client said
-								
-							} catch (\Exception $e) {
-								//
-							}
-						}
-					}
-				}
-			//Update status to live phase / Funded
-		}
+			}
+		//Update status to funded
+		
 		//Email for positive amount
 		//if($request->adjust_amount > 0){
 			$email_content = get_email(8);
@@ -728,176 +614,80 @@ class ChallengesController extends Controller
 				$user->save();
 				$APP_NAME  = env('APP_NAME');
 				$logo = '<img src="' . url('front-assets/img/-logo1.png') . '" alt="Expert funded" width="150">';
-				$actual_challenge = Challenge::with(['get_challenge_type'])->where('id', $id_val)->first();
-				if($actual_challenge->challenge_type == 0){ //For Old challenge
-					//Update status to failed
-						$maximum_drawdown = $actual_challenge;
-						if($maximum_drawdown->status != 2){ //If status not failed
-							$adjust_users_balance = Adjust_users_balance::where('challenge_id', $id_val)->where('type', 1)->sum('amount_paid');
-							
-							$maximum_drawdown_amount = $maximum_drawdown->get_challenge_type->amount * (10/100);				
-							if ($adjust_users_balance <= -$maximum_drawdown_amount) {
-								$maximum_drawdown->status = 2;
-								$maximum_drawdown->funded_date = null;
-								$maximum_drawdown->funded_email_status = 0;
-								$maximum_drawdown->save();
-							}
-							
-							$maximum_daily_drawdown_amount = ($adjust_users_balance + $maximum_drawdown->get_challenge_type->amount) * (5/100);
-							if ($adjust_users_balance <= -$maximum_daily_drawdown_amount) {
-								$maximum_drawdown->status = 2;
-								$maximum_drawdown->funded_date = null;
-								$maximum_drawdown->funded_email_status = 0;
-								$maximum_drawdown->save();
-							}
+				//Update status to failed
+					$maximum_drawdown = Challenge::with(['get_challenge_type'])->where('id', $id_val)->first();
+					if($maximum_drawdown->status != 2){ //If status not failed
+						$adjust_users_balance = Adjust_users_balance::where('challenge_id', $id_val)->where('type', 1)->sum('amount_paid');
+						
+						$maximum_drawdown_amount = $maximum_drawdown->get_challenge_type->amount * (10/100);				
+						if ($adjust_users_balance <= -$maximum_drawdown_amount) {
+							$maximum_drawdown->status = 2;
+							$maximum_drawdown->funded_date = null;
+							$maximum_drawdown->funded_email_status = 0;
+							$maximum_drawdown->save();
 						}
-					//Update status to failed
-					//Update status to funded
-						$get_challenge = $actual_challenge;
-						if($get_challenge->status != 1){
-							$adjust_users_balance = Adjust_users_balance::where('challenge_id', $id_val)->where('type', 1)->sum('amount_paid');
+						
+						$maximum_daily_drawdown_amount = ($adjust_users_balance + $maximum_drawdown->get_challenge_type->amount) * (5/100);
+						if ($adjust_users_balance <= -$maximum_daily_drawdown_amount) {
+							$maximum_drawdown->status = 2;
+							$maximum_drawdown->funded_date = null;
+							$maximum_drawdown->funded_email_status = 0;
+							$maximum_drawdown->save();
+						}
+					}
+				//Update status to failed
+				//Update status to funded
+					$get_challenge = Challenge::with(['get_challenge_type'])->where('id', $id_val)->first();
+					if($get_challenge->status != 1){
+						$adjust_users_balance = Adjust_users_balance::where('challenge_id', $id_val)->where('type', 1)->sum('amount_paid');
+						
+						$achieved_balance = $get_challenge->get_challenge_type->amount * (10/100);
+						if($achieved_balance <= $adjust_users_balance){
+							$get_challenge->status = 1;
+							$get_challenge->funded_date = date('Y-m-d');
+							$get_challenge->funded_email_status = 1;
+							$get_challenge->save();
 							
-							$achieved_balance = $get_challenge->get_challenge_type->amount * (10/100);
-							if($achieved_balance <= $adjust_users_balance){
-								$get_challenge->status = 1;
-								$get_challenge->funded_date = date('Y-m-d');
-								$get_challenge->funded_email_status = 1;
-								$get_challenge->save();
+							//Update all adjust balance to zero
+							$adjust_users_balance_zero = Adjust_users_balance::where('challenge_id', $id_val)->where('type', 1)->update(['amount_paid' => 0]);
+							
+							if(env('CERTIFICATE_SEND')){
+								$challenge_service = resolve(ChallengeService::class);
 								
-								//Update all adjust balance to zero
-								$adjust_users_balance_zero = Adjust_users_balance::where('challenge_id', $id_val)->where('type', 1)->update(['amount_paid' => 0]);
-								
+								$name = $get_challenge->first_name.' '.$get_challenge->last_name;
+								$attatchment = $challenge_service->generateCertificate($id_val, $name, $adjust_users_balance, $get_challenge->funded_date);
+							}
+							/*$phase = $get_challenge->get_challenge_type->title;
+							$email_content = get_email(4);
+							if(!empty($email_content))
+							{
+								$maildata = [
+									'subject' => $email_content->message_subject,
+									'body' => str_replace(array("[LOGO]", "[PHASE]", "[SCREEN_NAME]", "[YEAR]"), array($logo, $phase, $APP_NAME, date('Y')), $email_content->message),
+									'toEmails' => array($get_challenge->email),
+									//'files' => array($attatchment),
+								];
 								if(env('CERTIFICATE_SEND')){
 									$challenge_service = resolve(ChallengeService::class);
 									
 									$name = $get_challenge->first_name.' '.$get_challenge->last_name;
 									$attatchment = $challenge_service->generateCertificate($id_val, $name, $adjust_users_balance, $get_challenge->funded_date);
+									//dd($attatchment);
+									if(!empty($attatchment)) {
+										$maildata['files'] = [$attatchment];
+									}
 								}
-								/*$phase = $get_challenge->get_challenge_type->title;
-								$email_content = get_email(4);
-								if(!empty($email_content))
-								{
-									$maildata = [
-										'subject' => $email_content->message_subject,
-										'body' => str_replace(array("[LOGO]", "[PHASE]", "[SCREEN_NAME]", "[YEAR]"), array($logo, $phase, $APP_NAME, date('Y')), $email_content->message),
-										'toEmails' => array($get_challenge->email),
-										//'files' => array($attatchment),
-									];
-									if(env('CERTIFICATE_SEND')){
-										$challenge_service = resolve(ChallengeService::class);
-										
-										$name = $get_challenge->first_name.' '.$get_challenge->last_name;
-										$attatchment = $challenge_service->generateCertificate($id_val, $name, $adjust_users_balance, $get_challenge->funded_date);
-										//dd($attatchment);
-										if(!empty($attatchment)) {
-											$maildata['files'] = [$attatchment];
-										}
-									}
-									try {
-										send_email($maildata);
-										
-									} catch (\Exception $e) {
-										//
-									}
-								}*/
-							}
-						}
-					//Update status to funded
-				}
-				else { //For New challenge
-					//Update status to failed
-						$maximum_drawdown = $actual_challenge;
-						if($maximum_drawdown->status != 2){ //If status not failed
-							$adjust_users_balance = Adjust_users_balance::where('challenge_id', $id_val)->where('type', 1)->sum('amount_paid');
-							
-							$maximum_drawdown_amount = $maximum_drawdown->get_challenge_type->amount * (15/100);				
-							if ($adjust_users_balance <= -$maximum_drawdown_amount) {
-								$maximum_drawdown->status = 2;
-								$maximum_drawdown->funded_date = null;
-								$maximum_drawdown->funded_email_status = 0;
-								$maximum_drawdown->save();
-							}
-							
-							$maximum_daily_drawdown_amount = ($adjust_users_balance + $maximum_drawdown->get_challenge_type->amount) * (5/100);
-							if ($adjust_users_balance <= -$maximum_daily_drawdown_amount) {
-								$maximum_drawdown->status = 2;
-								$maximum_drawdown->funded_date = null;
-								$maximum_drawdown->funded_email_status = 0;
-								$maximum_drawdown->save();
-							}
-						}
-					//Update status to failed
-					//Update status to phase 2
-						$get_challenge = $actual_challenge;
-						if($get_challenge->status != 3 && ($get_challenge->status == 0 || $get_challenge->status == 2)){
-							$adjust_users_balance = Adjust_users_balance::where('challenge_id', $id_val)->where('type', 1)->sum('amount_paid');
-							
-							$achieved_balance = $get_challenge->get_challenge_type->amount * (10/100);
-							if($achieved_balance <= $adjust_users_balance){
-								$get_challenge->status = 3;
-								$get_challenge->phase_one_amount = $adjust_users_balance;
-								$get_challenge->funded_date = null;
-								// $get_challenge->funded_email_status = 1;
-								$get_challenge->save();
-								
-								//Update all adjust balance to zero
-								$adjust_users_balance_zero = Adjust_users_balance::where('challenge_id', $id_val)->where('type', 1)->update(['amount_paid' => 0]);
-							}
-						}
-					//Update status to phase 2
-					//Update status to live phase / Funded
-						$get_challenge = $actual_challenge;
-						if($get_challenge->status != 1 && $get_challenge->status == 3){
-							$adjust_users_balance = Adjust_users_balance::where('challenge_id', $id_val)->where('type', 1)->sum('amount_paid');
-							
-							$achieved_balance = $get_challenge->get_challenge_type->amount * (5/100);
-							if($achieved_balance <= $adjust_users_balance){
-								$get_challenge->status = 1;
-								$get_challenge->phase_two_amount = $adjust_users_balance;
-								$get_challenge->funded_date = date('Y-m-d');
-								$get_challenge->funded_email_status = 1;
-								$get_challenge->save();
-								
-								//Update all adjust balance to zero
-								$adjust_users_balance_zero = Adjust_users_balance::where('challenge_id', $id_val)->where('type', 1)->update(['amount_paid' => 0]);
-								
-								if(env('CERTIFICATE_SEND')){
-									$challenge_service = resolve(ChallengeService::class);
+								try {
+									send_email($maildata);
 									
-									$name = $get_challenge->first_name.' '.$get_challenge->last_name;
-									$attatchment = $challenge_service->generateCertificate($id_val, $name, $adjust_users_balance, $get_challenge->funded_date);
+								} catch (\Exception $e) {
+									//
 								}
-								/*$phase = $get_challenge->get_challenge_type->title;
-								$email_content = get_email(4);
-								if(!empty($email_content))
-								{
-									$maildata = [
-										'subject' => $email_content->message_subject,
-										'body' => str_replace(array("[LOGO]", "[PHASE]", "[SCREEN_NAME]", "[YEAR]"), array($logo, $phase, $APP_NAME, date('Y')), $email_content->message),
-										'toEmails' => array($get_challenge->email),
-										//'files' => array($attatchment),
-									];
-									if(env('CERTIFICATE_SEND')){
-										$challenge_service = resolve(ChallengeService::class);
-										
-										$name = $get_challenge->first_name.' '.$get_challenge->last_name;
-										$attatchment = $challenge_service->generateCertificate($id_val, $name, $adjust_users_balance, $get_challenge->funded_date);
-										//dd($attatchment);
-										if(!empty($attatchment)) {
-											$maildata['files'] = [$attatchment];
-										}
-									}
-									try {
-										send_email($maildata);
-										
-									} catch (\Exception $e) {
-										//
-									}
-								}*/
-							}
+							}*/
 						}
-					//Update status to live phase / Funded
-				}
+					}
+				//Update status to funded
+				
 				//Email for positive amount
 					//if($request->adjust_percent > 0){
 						/*$email_content = get_email(8);

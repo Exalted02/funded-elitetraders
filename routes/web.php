@@ -70,8 +70,8 @@ Route::middleware(['auth', 'client'])->name('client.')->group(function () {
 	Route::post('/account-data', [DashboardController::class, 'account_data'])->name('account-data');
 		
 	//Verification
-	Route::get('/verification', [VerificationController::class, 'index'])->name('verification');
-	Route::post('/verification', [VerificationController::class, 'save'])->name('client.verification'); 
+	Route::get('/verification-4f.5i>&65n', [VerificationController::class, 'index'])->name('verification'); //remove 4f.5i>&65n from route
+	Route::post('/verification-4f.5i>&65n', [VerificationController::class, 'save'])->name('client.verification');  //remove 4f.5i>&65n from route
 	
 	//Route::post('/delete-kyc', [VerificationController::class, 'delete_kyc_doc'])->name('client.delete-kyc');
 		

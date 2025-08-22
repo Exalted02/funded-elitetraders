@@ -37,6 +37,8 @@
 							<div class="col-md-5">
 								@if($val->status == 0)
 								<button class="btn btn-square btn-outline-warning"><i class="las la-clock"></i> On Challenge</button>
+								@elseif($val->status == 3)
+								<button class="btn btn-square btn-outline-warning"><i class="las la-clock"></i> Phase 2</button>
 								@elseif($val->status == 1)
 								<button class="btn btn-square btn-outline-success"><i class="las la-check-double"></i> Funded</button>
 								@elseif($val->status == 2)

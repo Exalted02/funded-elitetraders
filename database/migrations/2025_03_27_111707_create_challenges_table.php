@@ -24,7 +24,7 @@ return new class extends Migration
 			$table->double('amount_paid', 8, 2)->nullable();
 			$table->string('proof_document')->nullable();
 			$table->longText('comment')->nullable();
-			$table->tinyInteger('status')->nullable()->comment('0=on-challenge, 1=funded, 2=failed');
+			$table->tinyInteger('status')->nullable()->comment('0=on-challenge/phase 1, 1=funded/live phase, 2=failed, 3=phase 2');
             $table->timestamps();
         });
     }

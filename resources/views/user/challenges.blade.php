@@ -36,6 +36,7 @@
 							<select class="select" name="search_status">
 								<option value="">{{ __('please_select') }}</option>
 								<option value="0">On Challenge</option>
+								<option value="3">Phase 2</option>
 								<option value="1">Funded</option>
 								<option value="2">Failed</option>
 							</select>

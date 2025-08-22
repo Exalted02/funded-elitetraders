@@ -66,3 +66,22 @@ D:\xampp\htdocs\funded-elitetraders\vendor
 
 D:\xampp\htdocs\funded-elitetraders\public\verification-certificate\certificate.png
 
+-----------------21/08/2025 for Phase 1 phase 2 task-----------------
+ALTER TABLE `challenges` ADD `phase_one_amount` DOUBLE(8,2) NULL DEFAULT NULL AFTER `account_size_rand_number`, ADD `phase_two_amount` DOUBLE(8,2) NULL DEFAULT NULL AFTER `phase_one_amount`, ADD `phase_status` TINYINT(1) NOT NULL DEFAULT '1' AFTER `phase_two_amount`;
+ALTER TABLE `challenges` ADD `challenge_type` TINYINT(4) NOT NULL DEFAULT '1' COMMENT '0=Old, 1=New' AFTER `account_size_rand_number`, ADD `parent_paid_challenge_id` BIGINT(20) NULL DEFAULT NULL AFTER `challenge_type`;
+UPDATE `challenges` SET `challenge_type`=0 WHERE 1;
+ALTER TABLE `challenges` CHANGE `parent_paid_challenge_id` `parent_paid_challenge_id` BIGINT(20) NULL DEFAULT NULL COMMENT 'This is same(challenges) table id. If this field is null then this is paid challenge otherwise free challenge';
+ALTER TABLE `challenges` DROP `phase_status`;
+ALTER TABLE `challenges` CHANGE `status` `status` TINYINT(4) NULL DEFAULT NULL COMMENT '0=on-challenge, 1=funded, 2=failed, 3=phase 2';
+ALTER TABLE `challenges` CHANGE `status` `status` TINYINT(4) NULL DEFAULT NULL COMMENT '0=on-challenge/phase 1, 1=funded/live phase, 2=failed, 3=phase 2';
+
+
+1) D:\xampp\htdocs\funded-elitetraders\database\migrations\2025_04_29_131757_add_new_fields_to_challenges_table.php
+2) D:\xampp\htdocs\funded-elitetraders\database\migrations\2025_03_27_111707_create_challenges_table.php
+3) D:\xampp\htdocs\funded-elitetraders\app\Http\Controllers\ChallengesController-21-08-2025.php
+4) D:\xampp\htdocs\funded-elitetraders\app\Http\Controllers\ChallengesController.php
+5) D:\xampp\htdocs\funded-elitetraders\resources\views\_includes\sidebar.blade.php
+6) D:\xampp\htdocs\funded-elitetraders\resources\views\client\dashboard-challenge.blade.php
+7) D:\xampp\htdocs\funded-elitetraders\resources\views\user\certificate.blade.php
+8) D:\xampp\htdocs\funded-elitetraders\resources\views\user\challenges.blade.php
+
