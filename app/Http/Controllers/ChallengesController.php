@@ -425,7 +425,7 @@ class ChallengesController extends Controller
 			$adj_users_balance = Adjust_users_balance::where('challenge_id', $request->adjust_amount_challenge)->where('type', 1)->sum('amount_paid');
 			$max_trade_value = 50;
 			$max_adjust_amt = $challenge->get_challenge_type->amount * ($max_trade_value/100);
-			if($max_adjust_amt <= ($adj_users_balance+$percentage_value)){
+			if($max_adjust_amt < ($adj_users_balance+$percentage_value)){
 				// dd($max_adjust_amt.'||'.$adj_users_balance.'||'.$percentage_value);
 				$data['result'] = 'This challenge reached max '.$max_trade_value.'%';		
 				$data['status'] = 400;		
@@ -720,6 +720,17 @@ class ChallengesController extends Controller
 			$user = User::find($challenge->user_id);
 			if($challenge->get_challenge_type->amount > 0){
 				$percentage_value = $challenge->get_challenge_type->amount * ($request->adjust_percent/100);
+				
+				//Live phase (can make upto 50%)
+				if($challenge->status == 1){
+					$adj_users_balance = Adjust_users_balance::where('challenge_id', $id_val)->where('type', 1)->sum('amount_paid');
+					$max_trade_value = 50;
+					$max_adjust_amt = $challenge->get_challenge_type->amount * ($max_trade_value/100);
+					if($max_adjust_amt < ($adj_users_balance+$percentage_value)){
+						continue;
+					}
+				}
+				//Live phase (can make upto 50%)
 				
 				$adj_balance = new Adjust_users_balance();
 				$adj_balance->user_id = $challenge->user_id;
