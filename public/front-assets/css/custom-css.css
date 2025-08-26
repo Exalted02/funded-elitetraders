@@ -27,6 +27,36 @@
     background-color: #141414;
     border: 1px solid #2A2A2A;
 }
+.dashboard-card-body {
+	background-color: #141414;
+    border: 1px solid #2A2A2A;
+    border-radius: 18px;
+	padding: 0 !important;
+}
+.card-body-inner-content {
+	padding: 24px 12px;
+}
+.right-seperator{
+	border-right: 1px solid #2A2A2A;
+}
+.scale-boost {
+	display: flex;
+}
+.scale-boost i {
+	align-items: center;
+    display: flex;
+	font-size: 25px;
+}
+.scale-boost-green i {
+	color: green;
+}
+.scale-boost span {
+	    font-size: 15px;
+    margin-left: 5px;
+}
+.scale-boost-inner-seperator {
+	border-bottom: 1px solid #2A2A2A;
+}
 .custom-dropdown .dropdown-menu {
     background-color: #141414;
     border: 1px solid #2A2A2A;

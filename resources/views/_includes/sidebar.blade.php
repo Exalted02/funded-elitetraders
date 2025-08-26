@@ -55,9 +55,9 @@
 				<li class="{{ request()->routeIs('client.account') ? 'active' : '' }}">
 					<a href="{{ route('client.account')}}"><i class="la la-user-cog"></i> <span> Account </span></a>
 				</li>
-				{{--<li class="{{ request()->routeIs('client.verification') ? 'active' : '' }}">
+				<li class="{{ request()->routeIs('client.verification') ? 'active' : '' }}">
 					<a href="{{ route('client.verification')}}"><i class="la la-user-check"></i> <span> Verification </span></a>
-				</li>--}}
+				</li>
 				<li class="{{ request()->routeIs('payouts.random-payout-details') ? 'active' : '' }}">
 					<a href="{{ route('payouts.random-payout-details')}}"><i class="la la-money"></i> <span> Recent Payouts </span></a>
 				</li>

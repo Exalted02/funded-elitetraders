@@ -61,15 +61,17 @@ class ChallengesController extends Controller
 				$paid = \App\Models\Adjust_users_balance::where('challenge_id', $row->id)->where('type', 1)->sum('amount_paid');
 				return $paid + optional($row->get_challenge_type)->amount;
 			})
+			->addColumn('latest_adjust', function ($row) {
+				$latest = \App\Models\Adjust_users_balance::where('challenge_id', $row->id)
+					->where('type', 1)
+					->latest('created_at')
+					->first();
+
+				return $latest
+					? $latest->created_at->format('d M y')
+					: '-';
+			})
 			->addColumn('start_date', fn($row) => \Carbon\Carbon::parse($row->created_at)->format('d M y'))
-			/*->addColumn('state', function ($row) {
-				return match ($row->status) {
-					0 => '<a class="btn btn-white btn-sm badge-outline-primary dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa-regular fa-circle-dot text-primary"></i> On Challenge</a>',
-					1 => '<a class="btn btn-white btn-sm badge-outline-success dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa-regular fa-circle-dot text-success"></i> Funded</a>',
-					2 => '<a class="btn btn-white btn-sm badge-outline-danger dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa-regular fa-circle-dot text-danger"></i> Failed</a>',
-					default => '',
-				};
-			})*/
 			->addColumn('state', function ($row) {
 				$button = match ($row->status) {
 					0 => '<a class="btn btn-white btn-sm badge-outline-primary dropdown-toggle" href="#" data-bs-toggle="dropdown" aria-expanded="false">
@@ -417,6 +419,20 @@ class ChallengesController extends Controller
 		//$adjustAmount = floatval($request->adjust_amount);
 		$challenge = Challenge::with(['get_challenge_type'])->where('id', $request->adjust_amount_challenge)->first();
 		$percentage_value = $challenge->get_challenge_type->amount * ($request->adjust_amount/100);
+		
+		//Live phase (can make upto 50%)
+		if($challenge->status == 1){
+			$adj_users_balance = Adjust_users_balance::where('challenge_id', $request->adjust_amount_challenge)->where('type', 1)->sum('amount_paid');
+			$max_trade_value = 50;
+			$max_adjust_amt = $challenge->get_challenge_type->amount * ($max_trade_value/100);
+			if($max_adjust_amt <= ($adj_users_balance+$percentage_value)){
+				// dd($max_adjust_amt.'||'.$adj_users_balance.'||'.$percentage_value);
+				$data['result'] = 'This challenge reached max '.$max_trade_value.'%';		
+				$data['status'] = 400;		
+				return $data;
+			}
+		}
+		//Live phase (can make upto 50%)
 		
 		$adj_balance = new Adjust_users_balance();
 		$adj_balance->user_id = $request->adjust_amount_user;

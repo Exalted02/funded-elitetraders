@@ -81,6 +81,7 @@
 								<th>Challenge</th>
 								<th>Balance</th>
 								<th>Start Date</th>
+								<th>Last Updated</th>
 								<th>State</th>
 								<th class="text-end">Actions</th>
 							</tr>

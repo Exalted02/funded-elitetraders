@@ -67,6 +67,7 @@ $(document).ready(function() {
             { data: 'challenge', name: 'get_challenge_type.title' },
             { data: 'balance', name: 'balance', orderable: false, searchable: false },
             { data: 'start_date', name: 'created_at' },
+            { data: 'latest_adjust', name: 'latest_adjust' },
             { data: 'state', name: 'status', orderable: false, searchable: false },
             { data: 'actions', name: 'actions', orderable: false, searchable: false },
         ],
@@ -374,6 +375,7 @@ $(document).ready(function() {
 				$('#adjust_amount_user').val(response.result.user_id);
 				$('#adjust_balance').text(response.adjust_users_balance);
 				$('#adjust_balance_model').modal('show');
+				$('.invalid-feedback').hide().text('');
 				currentBalance = response.result.get_challenge_type.amount + response.adjust_users_balance;
 				challengeBalance = response.result.get_challenge_type.amount;
 			},
@@ -452,15 +454,19 @@ $(document).ready(function() {
 			contentType: false,
 			//dataType: 'json',
 			success: function(response) {
-				if(type == 'add'){
-					$('.adjust_balance_msg').text('User balance added successfully.');
+				if(response.status == 400){
+					$('.invalid-feedback').show().text(response.result);
 				}else{
-					$('.adjust_balance_msg').text('User balance removed successfully.');
+					if(type == 'add'){
+						$('.adjust_balance_msg').text('User balance added successfully.');
+					}else{
+						$('.adjust_balance_msg').text('User balance removed successfully.');
+					}
+					$('#adjust_balance_msg').modal('show');
+					setTimeout(() => {
+						window.location.reload();
+					}, "1000");					
 				}
-				$('#adjust_balance_msg').modal('show');
-				setTimeout(() => {
-					window.location.reload();
-				}, "1000");
 			},
 			error: function (xhr) {
 				if (xhr.status === 422) {

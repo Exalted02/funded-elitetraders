@@ -84,4 +84,8 @@ ALTER TABLE `challenges` CHANGE `status` `status` TINYINT(4) NULL DEFAULT NULL C
 6) D:\xampp\htdocs\funded-elitetraders\resources\views\client\dashboard-challenge.blade.php
 7) D:\xampp\htdocs\funded-elitetraders\resources\views\user\certificate.blade.php
 8) D:\xampp\htdocs\funded-elitetraders\resources\views\user\challenges.blade.php
+9) D:\xampp\htdocs\funded-elitetraders\routes\web.php
+
+10) D:\xampp\htdocs\funded-elitetraders\public\front-assets\js\page\challenges.js
+
 
