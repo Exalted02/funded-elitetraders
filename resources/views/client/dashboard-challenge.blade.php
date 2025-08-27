@@ -78,6 +78,9 @@
 								</div>
 								<div class="">
 									<div class="card-body-inner-content">
+										<div class="text-center">
+											<h3 class="mb-2">Rewards</h3>
+										</div>
 										<div class="scale-boost scale-boost-green">
 											<i class="las la-check-square"></i>
 											<span>100% Funded Unlocked</span>

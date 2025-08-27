@@ -288,7 +288,7 @@ class DashboardController extends Controller
 		$data['lot_sizes'] = [
 			change_date_format($challenge_val->created_at, 'Y-m-d H:i:s', 'd M y') => $challenge_val->account_size_rand_number,
 		];
-		
+		$data['challenge_id'] = $id;
 		// dd($tradePairCount);
 		//Check trade static data
         return view('client.dashboard', $data);

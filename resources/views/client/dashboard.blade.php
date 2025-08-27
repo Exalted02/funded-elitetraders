@@ -126,6 +126,79 @@
 					</div>
 				</div>
 			</div>--}}
+			@php
+				$challenge = App\Models\Challenge::with(['get_challenge_type'])->where('id', $challenge_id)->where('user_id', Auth::id())->first();
+				$adjust_users_balance = App\Models\Adjust_users_balance::where('user_id', Auth::id())->where('challenge_id', $challenge_id)->where('type', 1)->sum('amount_paid');
+			@endphp
+			@if($challenge->status == 1)
+			<div class="row">
+				<div class="col-md-12 col-lg-12 col-xl-12">
+					<div class="card dashboard-card-body">
+						<div class="row">
+							@php
+								$scale_boost_trade_value = 12;
+								$max_scale_boost_amt = $challenge->get_challenge_type->amount * ($scale_boost_trade_value/100);
+								
+								// calculate percentage progress
+								$progress_percent = 0;
+								if ($max_scale_boost_amt > 0) {
+									$progress_percent = ($adjust_users_balance / $max_scale_boost_amt) * 100;
+								}
+
+								// cap at 100
+								if ($progress_percent > 100) {
+									$progress_percent = 100;
+								}
+							@endphp
+							@if($max_scale_boost_amt <= $adjust_users_balance)
+							<div class="col-md-12">	
+								<div class="reward-badge-container">
+									<div class="card-body-inner-content">
+										<button class="btn btn-square btn-success"><i class="las la-check-double"></i> Rewarded</button>
+									</div>
+								</div>
+							</div>
+							@else
+							<div class="col-md-6 right-seperator">
+								<div class="">
+									<div class="card-body-inner-content">
+										<div class="">
+											<h3>Scale Boost</h3>
+											<div class="stats-info1">													
+												<p class="text-end mb-1"><small>{{ round($progress_percent, 2) }}%</small></p>
+												<div class="progress">
+													<div class="progress-bar bg-info" role="progressbar"  aria-valuenow="{{ round($progress_percent, 2) }}" aria-valuenow="22" aria-valuemin="0" aria-valuemax="100" style="width: {{ $progress_percent }}%"></div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+							<div class="col-md-6">
+								<div class="card-body-inner-content">
+									<div class="">
+										<h3 class="mb-2">Rewards</h3>
+										<div class="scale-boost scale-boost-green">
+											<i class="las la-check-square"></i>
+											<span>100% Funded Unlocked</span>
+										</div>
+										<div class="scale-boost scale-boost-green">
+											<i class="las la-check-square"></i>
+											<span>Instant 7 Day Payouts</span>
+										</div>
+										<div class="scale-boost scale-boost-green">
+											<i class="las la-check-square"></i>
+											<span>Get Double Funding You Have</span>
+										</div>
+									</div>
+								</div>
+							</div>
+							@endif
+						</div>
+					</div>
+				</div>
+			</div>
+			@endif
 			<div class="row">
 				<div class="col-md-12">
 					<div class="table-responsive">
