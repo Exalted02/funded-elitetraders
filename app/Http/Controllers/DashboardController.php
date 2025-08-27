@@ -121,6 +121,7 @@ class DashboardController extends Controller
 		$data = [];
 		$labels = [];
 		$values = [];
+		$tooltipData = [];
 		$previous_chart_amount = 0;
 		//For Equity
 		// $equity = Challenge::with(['get_challenge_type'])->where('user_id', Auth::id())->whereDate('created_at', Carbon::today())->get();
