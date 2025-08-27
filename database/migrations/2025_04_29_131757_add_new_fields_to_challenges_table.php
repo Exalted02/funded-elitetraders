@@ -23,6 +23,7 @@ return new class extends Migration
 			$table->bigInteger('parent_paid_challenge_id')->nullable()->comment('This is same(challenges) table id. If this field is null then this is paid challenge otherwise free challenge')->after('challenge_type');
 			$table->double('phase_one_amount', 8, 2)->nullable()->after('parent_paid_challenge_id');
 			$table->double('phase_two_amount', 8, 2)->nullable()->after('phase_one_amount');
+			$table->tinyInteger('new_challenge_email_status')->default(0)->comment('0=email already send, 1=email not send')->after('phase_two_amount');
         });
     }
 

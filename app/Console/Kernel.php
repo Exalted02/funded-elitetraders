@@ -20,6 +20,8 @@ class Kernel extends ConsoleKernel
 		$schedule->command('app:multi-adjust-balance')->everyFifteenMinutes();
 		
 		$schedule->command('app:change-kyc-status')->everyFifteenMinutes();
+		
+		$schedule->command('app:new-challenge-email')->everyFifteenMinutes();
 		// $schedule->command('app:send-customer-notifications')->everyMinute();
     }
 

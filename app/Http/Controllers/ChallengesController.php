@@ -416,6 +416,9 @@ class ChallengesController extends Controller
         ],[
 			'adjust_amount' => 'Percent is required.',
 		]);
+		$APP_NAME  = env('APP_NAME');
+		$logo = '<img src="' . url('front-assets/img/-logo1.png') . '" alt="Expert funded" width="150">';
+		
 		//$adjustAmount = floatval($request->adjust_amount);
 		$challenge = Challenge::with(['get_challenge_type'])->where('id', $request->adjust_amount_challenge)->first();
 		$percentage_value = $challenge->get_challenge_type->amount * ($request->adjust_amount/100);
@@ -424,7 +427,60 @@ class ChallengesController extends Controller
 		if($challenge->status == 1){
 			$adj_users_balance = Adjust_users_balance::where('challenge_id', $request->adjust_amount_challenge)->where('type', 1)->sum('amount_paid');
 			$max_trade_value = 50;
+			$scale_boost_trade_value = 12;
 			$max_adjust_amt = $challenge->get_challenge_type->amount * ($max_trade_value/100);
+			$max_scale_boost_amt = $challenge->get_challenge_type->amount * ($scale_boost_trade_value/100);
+			if($max_scale_boost_amt <= ($adj_users_balance+$percentage_value)){  //Scale boost reward when 12% in funded/live phase
+				if($challenge->parent_paid_challenge_id == null){ //If null then this is paid challenge
+					$free_challenge_exists = Challenge::where('parent_paid_challenge_id', $request->adjust_amount_challenge)->first();
+					$challenge_type = Challenge_type::where('id', $challenge->challenge_id)->first();
+					if(!$free_challenge_exists){
+						$free_challenge = new Challenge();
+						$free_challenge->client_id = $challenge->client_id;
+						$free_challenge->client_pw = $challenge->client_pw;
+						$free_challenge->user_id = $challenge->user_id;
+						$free_challenge->email = $challenge->email;
+						$free_challenge->first_name = $challenge->first_name;
+						$free_challenge->last_name = $challenge->last_name;
+						$free_challenge->phone = $challenge->phone;
+						$free_challenge->challenge_id = $challenge->challenge_id;
+						$free_challenge->amount_paid = $challenge->amount_paid;
+						$free_challenge->proof_document = $challenge->proof_document;
+						$free_challenge->comment = $challenge->comment;
+						$free_challenge->status = 0;
+						$free_challenge->account_size_rand_number = $challenge->account_size_rand_number;
+						$free_challenge->parent_paid_challenge_id = $challenge->id;
+						$free_challenge->created_at = date('Y-m-d h:i:s');
+						if($free_challenge->save()){		
+							$free_adj_balance = new Adjust_users_balance();
+							$free_adj_balance->user_id = $challenge->user_id;
+							$free_adj_balance->challenge_id = $free_challenge->id;
+							$free_adj_balance->exact_amount_paid = $free_challenge->amount_paid;
+							$free_adj_balance->amount_paid = $free_challenge->amount_paid;
+							$free_adj_balance->type = 2;
+							$free_adj_balance->status = 0;
+							$free_adj_balance->save();
+							
+							//For trading account
+							$email_content1 = get_email(10);
+							if(!empty($email_content1))
+							{
+								$user_email = User::where('id', $challenge->user_id)->first();
+								$maildata1 = [
+									'subject' => $email_content1->message_subject,
+									'body' => str_replace(array("[LOGO]", "[PRICE_SIZE]", "[PRICE]", "[DATE]", "[SCREEN_NAME]", "[YEAR]", "[LINK_LOGIN]"), array($logo, get_currency_symbol().$challenge_type->amount, get_currency_symbol().$challenge->amount_paid, date('d M y'), $APP_NAME, date('Y'), route('login')), $email_content1->message),
+									'toEmails' => array($user_email->email),
+								];
+								try {
+									send_email($maildata1);
+								} catch (\Exception $e) {
+									//
+								}
+							}
+						}
+					}
+				}
+			}
 			if($max_adjust_amt < ($adj_users_balance+$percentage_value)){
 				// dd($max_adjust_amt.'||'.$adj_users_balance.'||'.$percentage_value);
 				$data['result'] = 'This challenge reached max '.$max_trade_value.'%';		
@@ -455,8 +511,6 @@ class ChallengesController extends Controller
 			$user->users_balances = $percentage_value;
 		}
 		
-		$APP_NAME  = env('APP_NAME');
-		$logo = '<img src="' . url('front-assets/img/-logo1.png') . '" alt="Expert funded" width="150">';
 		$actual_challenge = Challenge::with(['get_challenge_type'])->where('id', $request->adjust_amount_challenge)->first();
 		if($actual_challenge->challenge_type == 0){ //For Old challenge
 			//Update status to failed
@@ -725,7 +779,60 @@ class ChallengesController extends Controller
 				if($challenge->status == 1){
 					$adj_users_balance = Adjust_users_balance::where('challenge_id', $id_val)->where('type', 1)->sum('amount_paid');
 					$max_trade_value = 50;
+					$scale_boost_trade_value = 12;
 					$max_adjust_amt = $challenge->get_challenge_type->amount * ($max_trade_value/100);
+					$max_scale_boost_amt = $challenge->get_challenge_type->amount * ($scale_boost_trade_value/100);
+					if($max_scale_boost_amt <= ($adj_users_balance+$percentage_value)){  //Scale boost reward when 12% in funded/live phase
+						if($challenge->parent_paid_challenge_id == null){ //If null then this is paid challenge
+							$free_challenge_exists = Challenge::where('parent_paid_challenge_id', $id_val)->first();
+							if(!$free_challenge_exists){
+								$free_challenge = new Challenge();
+								$free_challenge->client_id = $challenge->client_id;
+								$free_challenge->client_pw = $challenge->client_pw;
+								$free_challenge->user_id = $challenge->user_id;
+								$free_challenge->email = $challenge->email;
+								$free_challenge->first_name = $challenge->first_name;
+								$free_challenge->last_name = $challenge->last_name;
+								$free_challenge->phone = $challenge->phone;
+								$free_challenge->challenge_id = $challenge->challenge_id;
+								$free_challenge->amount_paid = $challenge->amount_paid;
+								$free_challenge->proof_document = $challenge->proof_document;
+								$free_challenge->comment = $challenge->comment;
+								$free_challenge->status = 0;
+								$free_challenge->account_size_rand_number = $challenge->account_size_rand_number;
+								$free_challenge->parent_paid_challenge_id = $challenge->id;
+								$free_challenge->new_challenge_email_status = 1;
+								$free_challenge->created_at = date('Y-m-d h:i:s');
+								if($free_challenge->save()){		
+									$free_adj_balance = new Adjust_users_balance();
+									$free_adj_balance->user_id = $challenge->user_id;
+									$free_adj_balance->challenge_id = $free_challenge->id;
+									$free_adj_balance->exact_amount_paid = $free_challenge->amount_paid;
+									$free_adj_balance->amount_paid = $free_challenge->amount_paid;
+									$free_adj_balance->type = 2;
+									$free_adj_balance->status = 0;
+									$free_adj_balance->save();
+									
+									/*
+									//For trading account
+									$email_content1 = get_email(10);
+									if(!empty($email_content1))
+									{
+										$maildata1 = [
+											'subject' => $email_content1->message_subject,
+											'body' => str_replace(array("[LOGO]", "[PRICE_SIZE]", "[PRICE]", "[DATE]", "[SCREEN_NAME]", "[YEAR]", "[LINK_LOGIN]"), array($logo, get_currency_symbol().$challenge_type->amount, get_currency_symbol().$request->post('trading_amount'), date('d M y'), $APP_NAME, date('Y'), route('login')), $email_content1->message),
+											'toEmails' => array($user_email),
+										];
+										try {
+											send_email($maildata1);
+										} catch (\Exception $e) {
+											//
+										}
+									}*/
+								}
+							}
+						}
+					}
 					if($max_adjust_amt < ($adj_users_balance+$percentage_value)){
 						continue;
 					}
