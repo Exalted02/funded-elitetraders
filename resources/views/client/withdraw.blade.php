@@ -75,7 +75,7 @@
 													<span class="d-block">Your Current Profit Split:</span>
 												</div>
 												<div>
-													<span class="text-success">80%</span>
+													<span class="text-success">{{$reward_percent}}%</span>
 												</div>
 											</div>
 										</div>

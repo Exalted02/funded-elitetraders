@@ -369,6 +369,17 @@ class DashboardController extends Controller
 			$data['eligible_date']  = Carbon::now()->format('Y-m-d');
 		}
 		
+		$data['reward_percent'] = '90';
+		$challenge = Challenge::with(['get_challenge_type'])->where('id', session()->get('last_selected_challenge'))->first();
+		if($challenge->status == 1){
+			$adjust_users_balance = Adjust_users_balance::where('user_id', Auth::id())->where('challenge_id', $challenge->id)->where('type', 1)->sum('amount_paid');
+			$scale_boost_trade_value = 12;
+			$max_scale_boost_amt = $challenge->get_challenge_type->amount * ($scale_boost_trade_value/100);
+			if($max_scale_boost_amt <= $adjust_users_balance){
+				$data['reward_percent'] = '100';
+			}
+		}
+		
 		// dd($challenge->funded_date);
         return view('client.withdraw', $data);
     }

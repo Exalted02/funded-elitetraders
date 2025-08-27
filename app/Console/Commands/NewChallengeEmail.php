@@ -3,6 +3,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Models\Challenge;
+use App\Models\Challenge_type;
 use App\Models\User;
 use Illuminate\Support\Facades\Mail;
 use Carbon\Carbon;
