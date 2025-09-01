@@ -435,9 +435,18 @@ class ChallengesController extends Controller
 					$free_challenge_exists = Challenge::where('parent_paid_challenge_id', $request->adjust_amount_challenge)->first();
 					$challenge_type = Challenge_type::where('id', $challenge->challenge_id)->first();
 					if(!$free_challenge_exists){
+						$characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()';
+						$trading_password = '';
+						$length = 10;
+
+						for ($i = 0; $i < $length; $i++) {
+							$trading_password .= $characters[random_int(0, strlen($characters) - 1)];
+						}
+						$trading_id = mt_rand(10000000, 99999999);
+		
 						$free_challenge = new Challenge();
-						$free_challenge->client_id = $challenge->client_id;
-						$free_challenge->client_pw = $challenge->client_pw;
+						$free_challenge->client_id = $trading_id;
+						$free_challenge->client_pw = $trading_password;
 						$free_challenge->user_id = $challenge->user_id;
 						$free_challenge->email = $challenge->email;
 						$free_challenge->first_name = $challenge->first_name;
@@ -786,9 +795,18 @@ class ChallengesController extends Controller
 						if($challenge->parent_paid_challenge_id == null){ //If null then this is paid challenge
 							$free_challenge_exists = Challenge::where('parent_paid_challenge_id', $id_val)->first();
 							if(!$free_challenge_exists){
+								$characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()';
+								$trading_password = '';
+								$length = 10;
+
+								for ($i = 0; $i < $length; $i++) {
+									$trading_password .= $characters[random_int(0, strlen($characters) - 1)];
+								}
+								$trading_id = mt_rand(10000000, 99999999);
+						
 								$free_challenge = new Challenge();
-								$free_challenge->client_id = $challenge->client_id;
-								$free_challenge->client_pw = $challenge->client_pw;
+								$free_challenge->client_id = $trading_id;
+								$free_challenge->client_pw = $trading_password;
 								$free_challenge->user_id = $challenge->user_id;
 								$free_challenge->email = $challenge->email;
 								$free_challenge->first_name = $challenge->first_name;

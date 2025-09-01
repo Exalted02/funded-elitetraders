@@ -94,13 +94,29 @@ class ProfileController extends Controller
 				$val->save();
 			}
 		}*/
-		$adjust_records = Adjust_users_balance::where('type', 1)->whereNotNull('percentage_value')
+		/*$adjust_records = Adjust_users_balance::where('type', 1)->whereNotNull('percentage_value')
 			->get();
 		foreach($adjust_records as $k=>$adjust_records_val){
 			$get_challenge = Challenge::with(['get_challenge_type'])->where('id', $adjust_records_val->challenge_id)->first();
 			
 			$adjust_records_val->exact_amount_paid = $get_challenge->get_challenge_type->amount * ($adjust_records_val->percentage_value/100);
 			$adjust_records_val->save();
-		}			
+		}*/
+		/*$challenges = Challenge::whereNotNull('parent_paid_challenge_id')->get();
+		foreach($challenges as $val){
+			$characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()';
+			$trading_password = '';
+			$length = 10;
+
+			for ($i = 0; $i < $length; $i++) {
+				$trading_password .= $characters[random_int(0, strlen($characters) - 1)];
+			}
+			$trading_id = mt_rand(10000000, 99999999);
+			
+			
+			$val->client_id = $trading_id;
+			$val->client_pw = $trading_password;
+			$val->save();
+		}*/
     }
 }
