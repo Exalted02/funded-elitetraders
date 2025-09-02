@@ -458,23 +458,27 @@ class DashboardController extends Controller
 			$update = Adjust_users_balance::whereIn('id', $ids)
 				->update(['status' => 1]);
 			
-			// send mail to client 
-			$logo = '<img src="' . url('front-assets/img/-logo1.png') . '" alt="Expert funded" width="150">';
-			$APP_NAME  = env('APP_NAME');
-			$email_content = get_email(9);
-			if(!empty($email_content))
-			{
-				$maildata = [
-					'subject' => $email_content->message_subject,
-					'body' => str_replace(array("[LOGO]", "[SCREEN_NAME]", "[AMOUNT]", "[CRYPTO_ADDRESS]"), array($logo, $APP_NAME, get_currency_symbol().$payout->requested_amount, $payout->usdc_edit_address), $email_content->message),
-					'toEmails' => array(auth()->user()->email),
-				];
-				
-				try {
-					send_email($maildata);
-				} catch (\Exception $e) {
-					//
+			$get_challenge = Challenge::where('id', session()->get('last_selected_challenge'))->first();
+			if($get_challenge->payout_email_send == 0){
+				// send mail to client 
+				$logo = '<img src="' . url('front-assets/img/-logo1.png') . '" alt="Expert funded" width="150">';
+				$APP_NAME  = env('APP_NAME');
+				$email_content = get_email(9);
+				if(!empty($email_content))
+				{
+					$maildata = [
+						'subject' => $email_content->message_subject,
+						'body' => str_replace(array("[LOGO]", "[SCREEN_NAME]", "[AMOUNT]", "[CRYPTO_ADDRESS]"), array($logo, $APP_NAME, get_currency_symbol().$payout->requested_amount, $payout->usdc_edit_address), $email_content->message),
+						'toEmails' => array(auth()->user()->email),
+					];
+					
+					try {
+						send_email($maildata);
+					} catch (\Exception $e) {
+						//
+					}
 				}
+				$up_challenge = Challenge::where('id', session()->get('last_selected_challenge'))->update(['payout_email_send' => 1]);
 			}
 			
 			$data['result'] ='success';	

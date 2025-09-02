@@ -24,6 +24,7 @@ return new class extends Migration
 			$table->double('phase_one_amount', 8, 2)->nullable()->after('parent_paid_challenge_id');
 			$table->double('phase_two_amount', 8, 2)->nullable()->after('phase_one_amount');
 			$table->tinyInteger('new_challenge_email_status')->default(0)->comment('0=email already send, 1=email not send')->after('phase_two_amount');
+			$table->tinyInteger('payout_email_send')->default(0)->comment('0=email not send, 1=email already send')->after('new_challenge_email_status');
         });
     }
 
