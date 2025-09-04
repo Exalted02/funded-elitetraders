@@ -93,6 +93,14 @@
 											<i class="las la-check-square"></i>
 											<span>Get Double Funding You Have</span>
 										</div>
+										<div class="scale-boost scale-boost-green">
+											<i class="las la-check-square"></i>
+											<span>Refund for the challenge cost once minimum trading days complete</span>
+										</div>
+										<div class="scale-boost scale-boost-green">
+											<i class="las la-check-square"></i>
+											<span>Raw simulated spreads</span>
+										</div>
 									</div>
 								</div>
 								@endif
